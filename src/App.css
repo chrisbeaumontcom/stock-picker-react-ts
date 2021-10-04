@@ -1,0 +1,88 @@
+.App {
+  text-align: center;
+}
+.container {
+  width: 100%;
+  max-width: 1096px;
+  margin: 20px auto;
+}
+table.allocation {
+  border-collapse: collapse;
+  width: 100%;
+}
+table.allocation th {
+  border: 1px solid #333;
+  padding: 2px;
+  font-size: 0.8rem;
+  font-weight: normal;
+  max-width: 0px;
+}
+table.allocation td {
+  border: 1px solid #333;
+  padding: 2px;
+  font-size: 0.7rem;
+  vertical-align: top;
+  padding-top: 20px;
+  max-width: 0px;
+}
+table.allocation td.thumb-col {
+  padding: 1px;
+}
+table.allocation td.thumb-col img {
+  width: 50px;
+  height: auto;
+}
+table.allocation td.order-list {
+  font-size: 0.6rem;
+  padding-top: 1px;
+}
+
+table.allocation td input {
+  width: 20px;
+  text-align: center;
+}
+div.no-wrap {
+  white-space: nowrap;
+}
+button.del-item {
+  background: none;
+  margin: 0;
+  padding: 1px;
+  margin-left: 2px;
+  font-size: 0.7rem;
+  line-height: 0.6;
+  border: 1px solid #999;
+  border-radius: 3px;
+}
+button.btn-remove {
+  font-size: 2.5em;
+  line-height: 0.5;
+  padding: 0px;
+}
+table.page-order {
+  border-collapse: collapse;
+  width: 100%;
+}
+table.page-order td {
+  border: 1px solid #333;
+  padding: 2px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+table.page-order td input {
+  width: 20px;
+  text-align: center;
+}
+table.page-order td.thumb-col {
+  padding: 1px;
+}
+table.page-order td.thumb-col img {
+  width: 30px;
+  height: auto;
+}
+table.page-order td.right {
+  text-align: right;
+}
+table.page-order td.money {
+  text-align: right;
+}

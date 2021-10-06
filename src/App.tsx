@@ -22,7 +22,7 @@ const config = {
   sessionKey: 'Example-order',
 };
 
-export default function App(): React.ReactNode {
+export default function App() {
   const [msg, setMsg] = useState('');
   const [loaded, setLoaded] = useState(false);
   const [colours, setColours] = useState<Colour[]>([]);

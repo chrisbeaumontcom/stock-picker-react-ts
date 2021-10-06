@@ -1,3 +1,8 @@
+// App inserts API product data into a reactive table
+// for stock picking by SKU: Style/Colour/Size combination
+// Designed to be added to a wholesale apparel catalogue for
+// resellers to create purchase orders. Checkout summary is
+// not implimented in this demo.
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TableLegend from './components/TableLegend';
@@ -8,9 +13,10 @@ import OrderInfo from './components/OrderInfo';
 import { Product, Colour, Size, LineItem } from './appTypes';
 import { formatPrice, formatImage, sortOrder } from './utils';
 import './App.css';
-//https://api.chrisbeaumont.com/api/product?id=
+
+// 'http://localhost:3001/product/'
 const config = {
-  urlProduct: 'http://localhost:3001/product/',
+  urlProduct: 'https://api.chrisbeaumont.com/api/product?id=',
   imagePath:
     'https://res.cloudinary.com/web-school/image/upload/w_50,q_auto:best/dev/',
   sessionKey: 'Example-order',
@@ -31,7 +37,7 @@ export default function App(): React.ReactNode {
         ? docstyle.dataset.id
         : '0';
     // Get the order from storage
-    fetchOrderData();
+    setOrder(fetchOrderData());
     // Get data for this style from the api
     fetchProductData(config.urlProduct + id);
   }, []);
@@ -44,20 +50,25 @@ export default function App(): React.ReactNode {
     });
   }, [colours]);
 
-  function fetchOrderData(): void {
-    console.log('Getting cart...');
+  function fetchOrderData(): LineItem[] {
     const str =
       sessionStorage && sessionStorage[config.sessionKey]
         ? (sessionStorage.getItem(config.sessionKey) as string)
         : '[]';
-    setOrder(JSON.parse(str));
+    return JSON.parse(str);
+  }
+  function saveOrderData(items: LineItem[]) {
+    if (sessionStorage) {
+      sessionStorage.setItem(config.sessionKey, JSON.stringify(items));
+    } else {
+      setMsg('Sorry, storing your order failed.');
+    }
   }
   async function fetchProductData(endpoint: string): Promise<void> {
     try {
       const response = await axios.get(endpoint);
       if (response && response.data && response.data.success === true) {
         const data = response.data;
-        //console.log('Get Product:', data);
         if (data && data.success === true) {
           setColours(processColours(data.allocation));
           const newProduct: Product = {
@@ -68,7 +79,7 @@ export default function App(): React.ReactNode {
             discountPercentage: data.discountPercentage,
           };
           setProduct(newProduct);
-          setMsg(`Done: ${newProduct.style} ${newProduct.styletext}`);
+          setMsg(`Loaded: ${newProduct.style} ${newProduct.styletext}`);
           setLoaded(true);
         } else {
           throw new Error('Incorrect fetch data problem');
@@ -87,36 +98,11 @@ export default function App(): React.ReactNode {
     if (allocation && allocation.length > 0) {
       allocation.forEach(function (colour: Colour) {
         colour.sizes.forEach(function (size: Size) {
-          size.ordqty = 0; //getOrderQty(size.itemid)
+          size.ordqty = 0;
         });
       });
     }
     return allocation;
-  }
-  function addLineItem(lineitem: LineItem) {
-    const filterOrder = order.filter((item: LineItem) => {
-      return lineitem.itemid !== item.itemid;
-    });
-    const newOrder = [...filterOrder, lineitem];
-    sortOrder(newOrder, product.sizelist);
-    setOrder(newOrder);
-    saveOrder(newOrder);
-  }
-  function removeLineItem(id: string): void {
-    updateQty(id, 0);
-    const filterOrder = order.filter((item) => {
-      return item.itemid !== id;
-    });
-    setOrder(filterOrder);
-    saveOrder(filterOrder);
-  }
-  function saveOrder(items: LineItem[]) {
-    //console.log('Add to storage...');
-    if (sessionStorage) {
-      sessionStorage.setItem(config.sessionKey, JSON.stringify(items));
-    } else {
-      setMsg('Sorry, storing your order failed.');
-    }
   }
   function updateQty(vitemid: string, qty: number): void {
     if (colours && colours.length > 0) {
@@ -130,7 +116,29 @@ export default function App(): React.ReactNode {
       }
     }
   }
-  const handleChange = (
+  function addLineItem(lineitem: LineItem) {
+    const filterOrder = order.filter((item: LineItem) => {
+      return lineitem.itemid !== item.itemid;
+    });
+    const newOrder = [...filterOrder, lineitem];
+    sortOrder(newOrder, product.sizelist);
+    setOrder(newOrder);
+    saveOrderData(newOrder);
+  }
+  function removeLineItem(id: string): void {
+    updateQty(id, 0);
+    const filterOrder = order.filter((item) => {
+      return item.itemid !== id;
+    });
+    setOrder(filterOrder);
+    saveOrderData(filterOrder);
+  }
+  function colourItems(style: string, colour: string): LineItem[] {
+    return order.filter((el: LineItem) => {
+      return el.colour === colour && el.style === style;
+    });
+  }
+  const addToOrder = (
     input: HTMLInputElement,
     item: Size,
     img: string
@@ -159,53 +167,49 @@ export default function App(): React.ReactNode {
     };
     addLineItem(lineitem);
   };
-  function colourItems(style: string, colour: string): LineItem[] {
-    return order.filter((el: LineItem) => {
-      return el.colour === colour && el.style === style;
-    });
-  }
+
   return (
     <div className="App">
       <div className="container">
-        <h2>Stock Picker for {product.style} (React + TS)</h2>
+        <h2>Stock Picker for Style: {product.style}</h2>
         <p>{loaded ? msg : 'loading...'}</p>
-        <table className="allocation">
-          <thead>
-            {loaded && (
-              <TableLegend
-                col1txt={product.style}
-                col2txt="Order"
-                sizelist={product.sizelist}
-              />
-            )}
-          </thead>
-          <tbody>
-            {loaded &&
-              colours.map((colour) => (
-                <tr key={'colour' + colour.colour}>
-                  <TableCellImage
-                    colour={colour.colour}
-                    img={formatImage(colour.thumb, config.imagePath)}
-                    pricetext={product.country + formatPrice(colour.price)}
-                  />
-                  <TableCellOrder
-                    removeLineItem={removeLineItem}
-                    lineitems={colourItems(product.style, colour.colour)}
-                  />
-                  {colour.sizes.map((size) => (
-                    <TableCellSelect
-                      size={size}
-                      handleChange={handleChange}
-                      key={size.itemid}
-                      img={colour.thumb}
+        {loaded && product && (
+          <table className="allocation">
+            <thead>
+              {product.sizelist && (
+                <TableLegend
+                  col1txt={product.style}
+                  col2txt="Order"
+                  sizelist={product.sizelist}
+                />
+              )}
+            </thead>
+            <tbody>
+              {colours &&
+                colours.map((colour) => (
+                  <tr key={'colour' + colour.colour}>
+                    <TableCellImage
+                      colour={colour.colour}
+                      img={formatImage(colour.thumb, config.imagePath)}
+                      pricetext={product.country + formatPrice(colour.price)}
                     />
-                  ))}
-                </tr>
-              ))}
-          </tbody>
-        </table>
-
-        <hr />
+                    <TableCellOrder
+                      removeLineItem={removeLineItem}
+                      lineitems={colourItems(product.style, colour.colour)}
+                    />
+                    {colour.sizes.map((size) => (
+                      <TableCellSelect
+                        size={size}
+                        addToOrder={addToOrder}
+                        key={size.itemid}
+                        img={colour.thumb}
+                      />
+                    ))}
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
 
         <OrderInfo
           style={product.style}
@@ -214,7 +218,7 @@ export default function App(): React.ReactNode {
           country={product.country}
           discountPercentage={product.discountPercentage}
           removeLineItem={removeLineItem}
-          handleChange={handleChange}
+          addToOrder={addToOrder}
         />
       </div>
     </div>

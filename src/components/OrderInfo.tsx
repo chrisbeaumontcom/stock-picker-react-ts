@@ -11,7 +11,7 @@ type Props = {
   country: string;
   discountPercentage: number;
   removeLineItem: Function;
-  handleChange: Function;
+  addToOrder: Function;
 };
 
 export default function OrderInfo({
@@ -21,7 +21,7 @@ export default function OrderInfo({
   country,
   discountPercentage,
   removeLineItem,
-  handleChange,
+  addToOrder,
 }: Props) {
   // Only display items in the current style
   const lineitems = order.filter((el: LineItem) => {
@@ -53,74 +53,84 @@ export default function OrderInfo({
     var display = document.getElementById('bagdisplay');
     if (display) {
       if (count > 0) {
-        display.innerHTML =
-          '<a href="/checkout">My Cart [' + count + '] items</a>';
+        display.innerHTML = `<a href="/checkout">My Cart [${count}] ${
+          count === 1 ? 'item' : 'items'
+        }</a>`;
       } else {
-        display.innerHTML = 'My Cart 0 items';
+        display.innerHTML = 'My Cart is empty';
       }
     }
   }
   return (
-    <table className="page-order">
-      <tbody>
-        {lineitems.map((item) => (
-          <tr key={'list' + item.itemid}>
-            <td className="thumb-col">
-              <img src={imgPath + item.img} alt="thumbnail image" />
-            </td>
-            <td>{item.style}</td>
-            <td>{item.colour}</td>
-            <td>{item.styletext}</td>
-            <td>{item.size}</td>
-            <td>{formatPrice(item.customerPrice)}</td>
-            <td>
-              <input
-                name={'ord' + item.itemid}
-                value={item.ordqty}
-                onChange={(event) => handleChange(event.target, item, item.img)}
-              />
-            </td>
-            <td>
-              <button
-                onClick={() => {
-                  removeLineItem(item.itemid);
-                }}
-                className="btn del-item"
-              >
-                &times;
-              </button>
-            </td>
-            <td className="money">
-              {formatPrice(item.customerPrice * item.ordqty)}
-            </td>
-          </tr>
-        ))}
-        {/* Summary Totals*/}
-        {total > 0 && (
-          <>
-            <tr>
-              <td colSpan={8} className="right">
-                Sub Total
-              </td>
-              <td className="money">{formatPrice(subtotal)}</td>
-            </tr>
-            {discount > 0 && (
-              <tr>
-                <td colSpan={8} className="right">
-                  Discount ({discountPercentage}%)
-                </td>
-                <td className="money">{formatPrice(discount)}</td>
-              </tr>
-            )}
-            <tr>
-              <td colSpan={8} className="right">
-                Total
-              </td>
-              <td className="money">{country + formatPrice(total)}</td>
-            </tr>
-          </>
-        )}
-      </tbody>
-    </table>
+    <>
+      {lineitems.length > 0 && (
+        <div>
+          <h3 className="summary">Summary</h3>
+          <table className="page-order">
+            <tbody>
+              {lineitems.map((item) => (
+                <tr key={'list' + item.itemid}>
+                  <td className="thumb-col">
+                    <img src={imgPath + item.img} alt="thumbnail image" />
+                  </td>
+                  <td>{item.style}</td>
+                  <td>{item.colour}</td>
+                  <td>{item.styletext}</td>
+                  <td>{item.size}</td>
+                  <td>{formatPrice(item.customerPrice)}</td>
+                  <td>
+                    <input
+                      name={'ord' + item.itemid}
+                      value={item.ordqty}
+                      onChange={(event) =>
+                        addToOrder(event.target, item, item.img)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => {
+                        removeLineItem(item.itemid);
+                      }}
+                      className="btn del-item"
+                    >
+                      &times;
+                    </button>
+                  </td>
+                  <td className="money">
+                    {formatPrice(item.customerPrice * item.ordqty)}
+                  </td>
+                </tr>
+              ))}
+              {/* Summary Totals*/}
+              {total > 0 && (
+                <>
+                  <tr>
+                    <td colSpan={8} className="right">
+                      Sub Total
+                    </td>
+                    <td className="money">{formatPrice(subtotal)}</td>
+                  </tr>
+                  {discount > 0 && (
+                    <tr>
+                      <td colSpan={8} className="right">
+                        Discount ({discountPercentage}%)
+                      </td>
+                      <td className="money">{formatPrice(discount)}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td colSpan={8} className="right">
+                      Total
+                    </td>
+                    <td className="money">{country + formatPrice(total)}</td>
+                  </tr>
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
   );
 }

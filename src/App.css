@@ -1,11 +1,6 @@
 .App {
   text-align: center;
 }
-.container {
-  width: 100%;
-  max-width: 1096px;
-  margin: 20px auto;
-}
 table.allocation {
   border-collapse: collapse;
   width: 100%;
@@ -58,6 +53,10 @@ button.btn-remove {
   font-size: 2.5em;
   line-height: 0.5;
   padding: 0px;
+}
+h3.summary {
+  margin-top: 30px;
+  margin-bottom: 2px;
 }
 table.page-order {
   border-collapse: collapse;

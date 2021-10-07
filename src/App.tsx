@@ -10,15 +10,13 @@ import TableCellImage from './components/TableCellImage';
 import TableCellSelect from './components/TableCellSelect';
 import TableCellOrder from './components/TableCellOrder';
 import OrderInfo from './components/OrderInfo';
-import { Product, Colour, Size, LineItem } from './appTypes';
+import { Product, Colour, Size, LineItem, Config } from './appTypes';
 import { formatPrice, formatImage, sortOrder } from './utils';
 import './App.css';
 
-// 'http://localhost:3001/product/'
-const config = {
-  urlProduct: 'https://api.chrisbeaumont.com/api/product?id=',
-  imagePath:
-    'https://res.cloudinary.com/web-school/image/upload/w_50,q_auto:best/dev/',
+const config: Config = {
+  urlProduct: import.meta.env.VITE_PRODUCT_URL + '',
+  imagePath: import.meta.env.VITE_IMAGES_URL + '',
   sessionKey: 'Example-order',
 };
 
@@ -172,6 +170,7 @@ export default function App() {
     <div className="App">
       <div className="container">
         <h2>Stock Picker for Style: {product.style}</h2>
+        <p>{import.meta.env.MODE}</p>
         <p>{loaded ? msg : 'loading...'}</p>
         {loaded && product && (
           <table className="allocation">

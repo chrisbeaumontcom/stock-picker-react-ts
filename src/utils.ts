@@ -7,7 +7,7 @@ export function formatPrice(v: number): string {
   return '';
 }
 export function formatImage(path: string, origin: string): string {
-  if (path) {
+  if (path && origin) {
     return origin + path;
   }
   return '';

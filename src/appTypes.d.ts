@@ -47,3 +47,8 @@ export type LineItem = {
   img: string;
   styletext: string;
 };
+type Config = {
+  urlProduct: string;
+  imagePath: string;
+  sessionKey: string;
+};

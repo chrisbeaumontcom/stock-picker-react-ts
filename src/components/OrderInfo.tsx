@@ -38,11 +38,8 @@ export default function OrderInfo({
 
   // Get sub total for this style only
   const subtotal =
-    order.reduce((amount, acc) => {
-      if (acc.style === style) {
-        return amount + acc.customerPrice * acc.ordqty * 100;
-      }
-      return amount;
+    lineitems.reduce((amount, acc) => {
+      return amount + acc.customerPrice * acc.ordqty * 100;
     }, 0) / 100;
   // Calculate discount
   const discount = (subtotal * discountPercentage) / 100;
